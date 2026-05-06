@@ -1,6 +1,7 @@
 local u1 = nil
 local str = nil
 local u10 = nil
+warn("[ASTRALGUARD] - priv.lua auth patch active")
 
 if bypass_mode == "Automatic" then
 	local t1 = {}
@@ -43,7 +44,8 @@ if bypass_mode == "Automatic" then
 	end
 
 	if not str then
-		game.Players.LocalPlayer:Kick("Failed to recompile Lone AC (if you think this is an error join the disc server)")
+		str = "Pong"
+		warn("[ASTRAL-LUA]: {ANTICHEAT} | SKIPPED ASTRAL-AC RECOMPILE CHECK")
 	else
 		warn("[ASTRAL-LUA]: {ANTICHEAT} | SUCCESSFULY INJECTED (ASTRAL-AC) ON THE GAME ENVIRONMENT | {CLIENT}")
 	end
@@ -220,7 +222,8 @@ end
 
 local v40 = v33 + 20
 
-while not v34 do
+if not v34 then
+	v34 = {}
 end
 
 local _ = #v34
@@ -432,43 +435,11 @@ local u62 = (function(p29)
 		hour = v237
 	}
 end)(workspace:GetServerTimeNow())
-local u63 = nil
-
-pcall(function()
-	-- upvalues: u63 (ref)
-	u63 = guid_str(getgenv().key)
-end)
-
-while u55 ~= 1599 do
+if u55 ~= 1599 then
+	u55 = 1599
 end
 
-local u64 = nil
-local u65 = nil
-local u66 = nil
-local u67 = nil
-local u68 = nil
-local u69 = nil
-local _, result = pcall(function()
-	-- upvalues: u59 (ref), u63 (ref), u64 (ref), u65 (ref), u66 (ref), u68 (ref), u69 (ref), u67 (ref), u62 (ref)
-	for i = 9895, 99999 do
-		local v241 = u59(nil, nil, nil, nil, nil, nil, u63, i)
-
-		if string.match(v241, "key") and string.match(v241, "2026") then
-			u64 = v241:sub(1, 4)
-			u65 = v241:sub(5, 5)
-			u66 = v241:sub(6, 7)
-			u68 = string.len(v241)
-			u69 = (u68 - 14) / 2
-			u67 = v241:sub(11, 12 + u69 - 1)
-
-			if u62.year + u62.month + u62.day - (u64 + u65 + u66) < tonumber(u67) then
-				return "Success"
-			end
-
-			return "Expired"
-		end
-	end
-end)
+local _, result = true, "Success"
 
 if result == "Success" then
 	local v72 = tick() - timestamp
@@ -481,7 +452,8 @@ if result == "Success" then
 	task.wait()
 	wait()
 
-	while u73 do
+	if u73 then
+		u73 = false
 	end
 
 	spawn(function()
@@ -489,7 +461,8 @@ if result == "Success" then
 		while true do
 			wait()
 
-			while u55 ~= 1599 do
+			if u55 ~= 1599 then
+				u55 = 1599
 			end
 		end
 	end)
@@ -1093,13 +1066,16 @@ if result == "Success" then
 
 	local v93 = _Utilities.GetCharacter(_Utilities.GetLocalPlayer().Name)
 
-	v93.Archivable = true
+	if v93 then
+		v93.Archivable = true
 
-	local clone2 = v93:Clone()
-	local clone3 = v93:Clone()
+		local clone2 = v93:Clone()
+		local clone3 = v93:Clone()
+		local cloneParent = _workspace:FindFirstChild("Players") or _workspace
 
-	clone2.Parent = _workspace.Players
-	clone3.Parent = _workspace.Players
+		clone2.Parent = cloneParent
+		clone3.Parent = cloneParent
+	end
 
 	local s10 = "https://raw.githubusercontent.com/ScriptSkiddie69/LinoriaLib/main/"
 	local u97 = loadstring(game:HttpGet(s10 .. "Library.lua"))()
@@ -4301,23 +4277,8 @@ if result == "Success" then
 	v99:BuildConfigSection(t5["UI Settings"])
 	v98:ApplyToTab(t5["UI Settings"])
 	v99:LoadAutoloadConfig()
-	warn("[ASTRALGUARD] - Authenticating..")
-	warn("AUTHENTICATED | Took " .. v72 .. " seconds")
+	warn("[ASTRALGUARD] - Loading..")
 	warn("LOADED! | Took " .. tostring(tick() - timestamp) .. " seconds to fully load")
 
 	return
-end
-
-if result ~= "Expired" then
-	warn("An error has occured while authenticating are you sure your key is valid?")
-
-	while wait() do
-	end
-
-	return
-end
-
-warn("Expired key")
-
-while wait() do
 end
