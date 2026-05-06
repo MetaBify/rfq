@@ -435,38 +435,6 @@ local u62 = (function(p29)
 		hour = v237
 	}
 end)(workspace:GetServerTimeNow())
-if u55 ~= 1599 then
-	u55 = 1599
-end
-
-local _, result = true, "Success"
-
-if result == "Success" then
-	local v72 = tick() - timestamp
-	local u73 = true
-
-	spawn(function()
-		-- upvalues: u73 (ref)
-		u73 = false
-	end)
-	task.wait()
-	wait()
-
-	if u73 then
-		u73 = false
-	end
-
-	spawn(function()
-		-- upvalues: u55 (ref)
-		while true do
-			wait()
-
-			if u55 ~= 1599 then
-				u55 = 1599
-			end
-		end
-	end)
-
 	local s5 = "ASTRAL.LUA V1.2"
 	local s6 = "ASTRAL.LUA"
 	local _workspace = workspace
@@ -685,13 +653,22 @@ if result == "Success" then
 		end
 	})
 
-	local Items = _Services.ReplicatedStorage.Modules.Client.Config.Items
-	local lib = require(Items)
-	local clone = Items:Clone()
+	local Items = nil
+	local lib = {}
+	local clone = nil
+	local lib2 = {}
 
-	clone.Name = "AstralStats"
+	pcall(function()
+		Items = _Services.ReplicatedStorage.Modules.Client.Config.Items
+		lib = require(Items)
+		clone = Items:Clone()
+		clone.Name = "AstralStats"
+		lib2 = require(clone)
+	end)
 
-	local lib2 = require(clone)
+	if not Items then
+		warn("[ASTRALGUARD] - item config unavailable; continuing UI load")
+	end
 
 	function _Utilities.log(p32, p33, p34)
 		warn(string.format("[%s]: {%s} | %s | (%s) ", "ASTRAL-LUA", p32, p33, p34))
@@ -739,7 +716,13 @@ if result == "Success" then
 	end
 	function _Utilities.GetCharacter(p39)
 		-- upvalues: _workspace (ref)
-		return (_workspace.Players:FindFirstChild(p39))
+		local playerFolder = _workspace:FindFirstChild("Players")
+
+		if not playerFolder then
+			return nil
+		end
+
+		return playerFolder:FindFirstChild(p39)
 	end
 	function _Utilities.GetPlayers()
 		-- upvalues: _Services (ref)
@@ -758,6 +741,10 @@ if result == "Success" then
 	function _Utilities.GetHumanoid(p41)
 		-- upvalues: _Utilities (ref)
 		local v264 = _Utilities.GetPlayer(p41)
+		if not v264 then
+			return nil
+		end
+
 		local v265 = _Utilities.GetCharacter(v264.Name)
 
 		if not v265 then
@@ -769,6 +756,10 @@ if result == "Success" then
 	function _Utilities.GetPlayerPrimary(p42)
 		-- upvalues: _Utilities (ref)
 		local v267 = _Utilities.GetPlayer(p42)
+		if not v267 then
+			return nil
+		end
+
 		local v268 = _Utilities.GetCharacter(v267.Name)
 
 		if not v268 then
@@ -805,9 +796,10 @@ if result == "Success" then
 	end
 	function _Utilities.IsVisible(p46, p47)
 		-- upvalues: _Utilities (ref), CurrentCamera (ref), _workspace (ref)
-		local v279 = _Utilities.GetCharacter(_Utilities.LocalPlayer())
+		local localPlayer = _Utilities.GetLocalPlayer()
+		local v279 = localPlayer and _Utilities.GetCharacter(localPlayer.Name)
 
-		if p47 or v279 then
+		if p47 and v279 and p47:FindFirstChild("HumanoidRootPart") then
 			local v280 = p47.HumanoidRootPart.Position - p46
 			local raycastParams = RaycastParams.new()
 
@@ -1065,12 +1057,14 @@ if result == "Success" then
 	end
 
 	local v93 = _Utilities.GetCharacter(_Utilities.GetLocalPlayer().Name)
+	local clone2 = nil
+	local clone3 = nil
 
 	if v93 then
 		v93.Archivable = true
 
-		local clone2 = v93:Clone()
-		local clone3 = v93:Clone()
+		clone2 = v93:Clone()
+		clone3 = v93:Clone()
 		local cloneParent = _workspace:FindFirstChild("Players") or _workspace
 
 		clone2.Parent = cloneParent
@@ -1670,6 +1664,11 @@ if result == "Success" then
 		Callback = function(p91)
 			-- upvalues: u123 (ref), clone3 (ref)
 			u123 = p91
+
+			if not clone3 then
+				u123 = false
+				return
+			end
 
 			if not p91 then
 				if clone3:FindFirstChild("NoclipVisual") then
@@ -3364,7 +3363,7 @@ if result == "Success" then
 			end
 		end
 
-		if descendant:IsDescendantOf(u147) then
+		if u147 and descendant:IsDescendantOf(u147) then
 			if descendant:IsA("Model") then
 				u148 = descendant
 			end
@@ -3376,7 +3375,7 @@ if result == "Success" then
 			end
 		end
 
-		if descendant:IsDescendantOf(u148) and _Settings.Visuals.Viewmodel.Tools.Enabled then
+		if u148 and descendant:IsDescendantOf(u148) and _Settings.Visuals.Viewmodel.Tools.Enabled then
 			if not descendant:IsA("MeshPart") and (not descendant:IsA("BasePart") or descendant.Transparency == 1) then
 				if descendant:IsA("SurfaceAppearance") then
 					descendant:Destroy()
@@ -3449,13 +3448,19 @@ if result == "Success" then
 			_Text[player.Name] = nil
 		end
 	end)
-	clone2.Name = "so tuff"
-	clone2.Parent = _workspace
-	clone3.Name = "Visualiziariaroro"
-	clone3.Humanoid.PlatformStand = true
-	clone3.HumanoidRootPart.Anchored = true
-	clone2.HumanoidRootPart.Anchored = true
-	clone2.HumanoidRootPart.CanCollide = false
+	if clone2 and clone3 and clone2:FindFirstChild("HumanoidRootPart") and clone3:FindFirstChild("HumanoidRootPart") and clone3:FindFirstChild("Humanoid") then
+		clone2.Name = "so tuff"
+		clone2.Parent = _workspace
+		clone3.Name = "Visualiziariaroro"
+		clone3.Humanoid.PlatformStand = true
+		clone3.HumanoidRootPart.Anchored = true
+		clone2.HumanoidRootPart.Anchored = true
+		clone2.HumanoidRootPart.CanCollide = false
+	else
+		clone2 = nil
+		clone3 = nil
+		warn("[ASTRALGUARD] - clone visuals unavailable; skipping clone setup")
+	end
 
 	for _, v in pairs(CurrentCamera:GetDescendants()) do
 		if v:IsA("BasePart") or v:IsA("MeshPart") then
@@ -3463,19 +3468,23 @@ if result == "Success" then
 		end
 	end
 
-	for _, v in pairs(clone2:GetChildren()) do
-		if v.Name ~= "HumanoidRootPart" and v.Name ~= "Humanoid" then
-			v:Destroy()
+	if clone2 then
+		for _, v in pairs(clone2:GetChildren()) do
+			if v.Name ~= "HumanoidRootPart" and v.Name ~= "Humanoid" then
+				v:Destroy()
+			end
 		end
 	end
 
-	for _, v in pairs(clone3:GetChildren()) do
-		if v:IsA("BasePart") or v:IsA("MeshPart") or v:IsA("Humanoid") then
-			if v:IsA("BasePart") or v:IsA("MeshPart") then
-				v.CanCollide = false
+	if clone3 then
+		for _, v in pairs(clone3:GetChildren()) do
+			if v:IsA("BasePart") or v:IsA("MeshPart") or v:IsA("Humanoid") then
+				if v:IsA("BasePart") or v:IsA("MeshPart") then
+					v.CanCollide = false
+				end
+			else
+				v:Destroy()
 			end
-		else
-			v:Destroy()
 		end
 	end
 
@@ -3526,11 +3535,15 @@ if result == "Success" then
 		end
 
 		if _Hitbox.Enabled then
-			for _, v in pairs(_workspace.Players:GetChildren()) do
-				if v.Name ~= _Utilities.GetLocalPlayer().Name and v:FindFirstChild(_Hitbox.Hitbox) then
-					v:FindFirstChild(_Hitbox.Hitbox).Transparency = 0.5
-					v:FindFirstChild(_Hitbox.Hitbox).Size = Vector3.new(_Hitbox.Size, _Hitbox.Size, _Hitbox.Size)
-					v:FindFirstChild(_Hitbox.Hitbox).CanCollide = false
+			local playerFolder = _workspace:FindFirstChild("Players")
+
+			if playerFolder then
+				for _, v in pairs(playerFolder:GetChildren()) do
+					if v.Name ~= _Utilities.GetLocalPlayer().Name and v:FindFirstChild(_Hitbox.Hitbox) then
+						v:FindFirstChild(_Hitbox.Hitbox).Transparency = 0.5
+						v:FindFirstChild(_Hitbox.Hitbox).Size = Vector3.new(_Hitbox.Size, _Hitbox.Size, _Hitbox.Size)
+						v:FindFirstChild(_Hitbox.Hitbox).CanCollide = false
+					end
 				end
 			end
 		end
@@ -3582,39 +3595,36 @@ if result == "Success" then
 			end
 		end
 
-		if not _Settings.LegitBot.Enabled or _Settings.LegitBot.Type ~= "Silent" then
-			clone2.HumanoidRootPart.Size = Vector3.new(0, 0, 0)
-		else
-			if not clone2 or not clone2:FindFirstChild("HumanoidRootPart") then
-				return
+		if clone2 and clone2:FindFirstChild("HumanoidRootPart") then
+			if not _Settings.LegitBot.Enabled or _Settings.LegitBot.Type ~= "Silent" then
+				clone2.HumanoidRootPart.Size = Vector3.new(0, 0, 0)
+			else
+
+				local HumanoidRootPart = clone2.HumanoidRootPart
+				local CurrentCameraCFrame = CurrentCamera.CFrame
+
+				HumanoidRootPart.Size = Vector3.new(50, 50, 3)
+				HumanoidRootPart.Anchored = true
+
+				local v604 = CurrentCameraCFrame.LookVector * 8
+
+				HumanoidRootPart.CFrame = CFrame.new(CurrentCameraCFrame.Position + v604, CurrentCameraCFrame.Position + v604 + CurrentCameraCFrame.LookVector)
 			end
-
-			local HumanoidRootPart = clone2.HumanoidRootPart
-			local CurrentCameraCFrame = CurrentCamera.CFrame
-
-			HumanoidRootPart.Size = Vector3.new(50, 50, 3)
-			HumanoidRootPart.Anchored = true
-
-			local v604 = CurrentCameraCFrame.LookVector * 8
-
-			HumanoidRootPart.CFrame = CFrame.new(CurrentCameraCFrame.Position + v604, CurrentCameraCFrame.Position + v604 + CurrentCameraCFrame.LookVector)
 		end
 
 		local v605 = _Utilities.GetPlayerPrimary(v592.Name)
 
 		if u123 then
-			if not v605 then
+			if not v605 or not clone3 or not clone3:FindFirstChild("HumanoidRootPart") then
 				return
 			end
 
-			if clone3.HumanoidRootPart then
-				local v606 = v605.CFrame.LookVector * n8
-				local v607 = v605.CFrame + v606
+			local v606 = v605.CFrame.LookVector * n8
+			local v607 = v605.CFrame + v606
 
-				vector3 = v607
-				clone3.HumanoidRootPart.CFrame = v607
-			end
-		else
+			vector3 = v607
+			clone3.HumanoidRootPart.CFrame = v607
+		elseif v605 and clone3 and clone3:FindFirstChild("HumanoidRootPart") then
 			local v608 = v605.CFrame.LookVector * 10000
 			local v609 = v605.CFrame + v608
 
@@ -3856,14 +3866,15 @@ if result == "Success" then
 
 		if t6.Enabled then
 			local v633 = _Utilities.GetPlayerPrimary(_Utilities.GetLocalPlayer().Name)
+			local playerFolder = _workspace:FindFirstChild("Players")
 
-			if v633 then
+			if v633 and playerFolder then
 				local cFrame2 = CFrame.new(v633.Position)
 				local vector3_4 = Vector3.new(t6.Range, t6.Range, t6.Range)
 				local PartBoundsInBox = _workspace:GetPartBoundsInBox(cFrame2, vector3_4)
 
 				for _, v in pairs(PartBoundsInBox) do
-					if not v:IsDescendantOf(v633.Parent) and v:IsDescendantOf(_workspace.Players) and v.Name == "Head" then
+					if not v:IsDescendantOf(v633.Parent) and v:IsDescendantOf(playerFolder) and v.Name == "Head" then
 						local t26 = {
 							"Melee Hit",
 							false,
@@ -4281,4 +4292,3 @@ if result == "Success" then
 	warn("LOADED! | Took " .. tostring(tick() - timestamp) .. " seconds to fully load")
 
 	return
-end
