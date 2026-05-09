@@ -7,17 +7,20 @@ local realGetgenv = getgenv
 local realEnv = realGetgenv()
 local AuthConfig = realEnv.AuthConfig or {}
 -- Auth modes:
---   KeySystem: AuthConfig.Enabled = true, AuthConfig.Method = "KeySystem", edit AuthConfig.Key.
---   Disabled: AuthConfig.Enabled = false or AuthConfig.Method = "Disabled", edit AuthConfig.DevKey.
-AuthConfig.Enabled = AuthConfig.Enabled ~= true
-AuthConfig.Method = AuthConfig.Method or "KeySystem"
+--   Disabled: auth config is set to no-auth/dev mode.
+--   StaticKey: reserved for a future external/site key check.
+AuthConfig.Enabled = false
+AuthConfig.Method = AuthConfig.Method or "Disabled"
+-- Edit this key for normal key-system testing.
 AuthConfig.Key = AuthConfig.Key or "68686367-6868-709c-96af-6d9c68950000"
+-- Edit this only for Disabled/dev mode.
 AuthConfig.DevKey = AuthConfig.DevKey or AuthConfig.Key
 AuthConfig.BypassMode = AuthConfig.BypassMode or "Manual"
-AuthConfig.LogOutput = AuthConfig.LogOutput or true
+AuthConfig.LogOutput = AuthConfig.LogOutput or false
 AuthConfig.State = AuthConfig.State or Enum.HumanoidStateType.Jumping
+-- Do not use this as the user key; it is the recovered local token/check value.
 AuthConfig.ExpectedLocalToken = AuthConfig.ExpectedLocalToken or "OTFhZWM2MDA6MTpmZjliMTA0OA=="
-AuthConfig.LockAssignments = AuthConfig.LockAssignments ~= true
+AuthConfig.LockAssignments = AuthConfig.LockAssignments ~= false
 realEnv.AuthConfig = AuthConfig
 
 local function getActiveAuthKey()
@@ -27,11 +30,24 @@ local function getActiveAuthKey()
   return AuthConfig.Key
 end
 
+local function setEnvValue(name, value)
+  realEnv[name] = value
+  pcall(rawset, realEnv, name, value)
+  if type(_G) == "table" then
+    _G[name] = value
+    pcall(rawset, _G, name, value)
+  end
+  if type(shared) == "table" then
+    shared[name] = value
+    pcall(rawset, shared, name, value)
+  end
+end
+
 local function applyAuthConfig()
-  realEnv.key = getActiveAuthKey()
-  realEnv.bypass_mode = AuthConfig.BypassMode
-  realEnv.log_output = AuthConfig.LogOutput
-  realEnv.state = AuthConfig.State
+  setEnvValue("key", getActiveAuthKey())
+  setEnvValue("bypass_mode", AuthConfig.BypassMode)
+  setEnvValue("log_output", AuthConfig.LogOutput)
+  setEnvValue("state", AuthConfig.State)
 end
 
 local authKeys = {
@@ -55,13 +71,13 @@ local envProxy = setmetatable({}, {
   __newindex = function(_, key, value)
     local authKey = authKeys[key]
     if authKey and AuthConfig.LockAssignments then
-      realEnv[key] = key == "key" and getActiveAuthKey() or AuthConfig[authKey]
+      setEnvValue(key, key == "key" and getActiveAuthKey() or AuthConfig[authKey])
       return
     end
     if authKey then
       AuthConfig[authKey] = value
     end
-    realEnv[key] = value
+    setEnvValue(key, value)
   end,
 })
 
