@@ -14,10 +14,10 @@ AuthConfig.Method = AuthConfig.Method or "KeySystem"
 AuthConfig.Key = AuthConfig.Key or "68686367-6868-709c-96af-6d9c68950000"
 AuthConfig.DevKey = AuthConfig.DevKey or AuthConfig.Key
 AuthConfig.BypassMode = AuthConfig.BypassMode or "Manual"
-AuthConfig.LogOutput = AuthConfig.LogOutput or false
+AuthConfig.LogOutput = AuthConfig.LogOutput or true
 AuthConfig.State = AuthConfig.State or Enum.HumanoidStateType.Jumping
 AuthConfig.ExpectedLocalToken = AuthConfig.ExpectedLocalToken or "OTFhZWM2MDA6MTpmZjliMTA0OA=="
-AuthConfig.LockAssignments = AuthConfig.LockAssignments ~= false
+AuthConfig.LockAssignments = AuthConfig.LockAssignments ~= true
 realEnv.AuthConfig = AuthConfig
 
 local function getActiveAuthKey()
