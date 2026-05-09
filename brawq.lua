@@ -9,7 +9,7 @@ local AuthConfig = realEnv.AuthConfig or {}
 -- Auth modes:
 --   KeySystem: AuthConfig.Enabled = true, AuthConfig.Method = "KeySystem", edit AuthConfig.Key.
 --   Disabled: AuthConfig.Enabled = false or AuthConfig.Method = "Disabled", edit AuthConfig.DevKey.
-AuthConfig.Enabled = AuthConfig.Enabled ~= false
+AuthConfig.Enabled = AuthConfig.Enabled ~= true
 AuthConfig.Method = AuthConfig.Method or "KeySystem"
 AuthConfig.Key = AuthConfig.Key or "68686367-6868-709c-96af-6d9c68950000"
 AuthConfig.DevKey = AuthConfig.DevKey or AuthConfig.Key
