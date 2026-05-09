@@ -464,13 +464,16 @@ end
 
 local RecoveredWindow, RecoveredLibrary = buildRecoveredWindow()
 v70 = RecoveredWindow
-v71 = {}
+v71 = setmetatable({}, {
+  __index = function(target, key)
+    local tab = v70:AddTab(tostring(key))
+    rawset(target, key, tab)
+    return tab
+  end,
+})
 v72 = v70:AddTab("Main")
 v71.Main = v72
 v71.Movement = v72
-v71.Visuals = v70:AddTab("Visuals")
-v71.Misc = v70:AddTab("Misc")
-v71["UI Settings"] = v70:AddTab("UI Settings")
 function v62(v251, v501, v502)
   -- synthetic register locals stripped
   v254 = ensureCallable(v254)
